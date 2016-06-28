@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Text;
 
 namespace StatsdClient
 {
@@ -46,16 +47,6 @@ namespace StatsdClient
         public void LogTiming(string name, int milliseconds)
         {
             SendMetric(MetricType.TIMING, name, _prefix, milliseconds);
-        }
-
-        /// <summary>
-        /// Log a timing / latency
-        /// </summary>
-        /// <param name="name">The metric name.</param>
-        /// <param name="milliseconds">The duration, in milliseconds, for this metric.</param>
-        public void LogTiming(string name, long milliseconds)
-        {
-            LogTiming(name, (int)milliseconds);
         }
 
         /// <summary>
@@ -129,7 +120,10 @@ namespace StatsdClient
             {
                 throw new ArgumentNullException("name");
             }
-            _outputChannel.Send(PrepareMetric(metricType, name, prefix, value, postFix));
+            string metric = PrepareMetric(metricType, name, prefix, value, postFix);
+            byte[] payload = Encoding.UTF8.GetBytes(metric);
+
+            _outputChannel.Send(payload, payload.Length);
         }
 
         /// <summary>

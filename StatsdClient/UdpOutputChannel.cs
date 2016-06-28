@@ -1,7 +1,5 @@
-﻿using System.Linq;
-using System.Net;
+﻿using System;
 using System.Net.Sockets;
-using System.Text;
 
 namespace StatsdClient
 {
@@ -9,23 +7,25 @@ namespace StatsdClient
     {
         private readonly UdpClient _udpClient;
 
-        public UdpOutputChannel(string hostOrIPAddress, int port)
+        public UdpOutputChannel(string host, int port)
         {
-            IPAddress ipAddress;
-            // Is this an IP address already?
-            if (!IPAddress.TryParse(hostOrIPAddress, out ipAddress))
+            if (string.IsNullOrEmpty(host))
             {
-                // Convert to ipv4 address
-                ipAddress = Dns.GetHostAddresses(hostOrIPAddress).First(p => p.AddressFamily == AddressFamily.InterNetwork);
+                throw new ArgumentException($"Expected valid hostname or ip address but was empty string", nameof(port));
             }
+
+            if (port < 1 || port > ushort.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException(nameof(port), $"Expected a value between 1 and {ushort.MaxValue} but was {port}");
+            }
+
             _udpClient = new UdpClient();
-            _udpClient.Connect(ipAddress, port);
+            _udpClient.Connect(host, port);
         }
 
-        public void Send(string line)
+        public void Send(byte[] buffer, int length)
         {
-            byte[] payload = Encoding.UTF8.GetBytes(line);
-            _udpClient.Send(payload, payload.Length);
+            _udpClient.Send(buffer, buffer.Length);
         }
     }
 }
