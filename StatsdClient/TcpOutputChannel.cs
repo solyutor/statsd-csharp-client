@@ -7,34 +7,25 @@ namespace StatsdClient
     internal sealed class TcpOutputChannel : IOutputChannel
     {
         private readonly TcpClient _tcpClient;
-        private NetworkStream _stream;
         private readonly string _host;
         private readonly int _port;
-        private readonly bool _reconnectEnabled;
         private readonly int _retryAttempts;
 
-        public TcpOutputChannel(string host, int port, bool reconnectEnabled = true, int retryAttempts = 3)
+        public TcpOutputChannel(string host, int port, byte retryAttempts = 3)
         {
             _host = host;
             _port = port;
-            _reconnectEnabled = reconnectEnabled;
             _retryAttempts = retryAttempts;
             _tcpClient = new TcpClient();
         }
 
         public void Send(byte[] buffer, int length)
         {
-            int i = _reconnectEnabled ? _retryAttempts : 0;
-            SendWithRetry(buffer, length, i);
-        }
-
-        private void SendWithRetry(byte[] buffer, int length, int maxAttempts)
-        {
-            int attempt = 0;
+            int attempt = -1;
             do
             {
                 attempt++;
-            } while (TrySend(buffer, length) || attempt == maxAttempts);
+            } while (!TrySend(buffer, length) && attempt < _retryAttempts);
         }
 
         private bool TrySend(byte[] buffer, int length)
@@ -43,9 +34,9 @@ namespace StatsdClient
             {
                 if (!_tcpClient.Connected)
                 {
-                    RestoreConnection();
+                    _tcpClient.Connect(_host, _port);
                 }
-                _stream.Write(buffer, 0, length);
+                _tcpClient.GetStream().Write(buffer, 0, length);
                 return true;
             }
             catch (IOException ex)
@@ -59,18 +50,6 @@ namespace StatsdClient
                 Trace.TraceWarning("Sending metrics via TCP failed with a SocketException: {0}, code: {1}", ex.Message, ex.SocketErrorCode.ToString());
             }
             return false;
-        }
-
-        private void RestoreConnection()
-        {
-            lock (_tcpClient)
-            {
-                if (!_tcpClient.Connected)
-                {
-                    _tcpClient.Connect(_host, _port);
-                    _stream = _tcpClient.GetStream();
-                }
-            }
         }
     }
 }
