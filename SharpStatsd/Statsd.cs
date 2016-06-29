@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -128,7 +129,7 @@ namespace SharpStatsd
                 Trace.TraceWarning(String.Format("Metric value for {0} was less than zero: {1}. Not sending.", name, value));
                 return;
             }
-            SendMetric(metricType, name, value.ToString(), postFix);
+            SendMetric(metricType, name, value.ToString(CultureInfo.InvariantCulture), postFix);
         }
 
         private void SendMetric(string metricType, string name, string value, string postFix = null)
