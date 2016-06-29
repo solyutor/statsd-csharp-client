@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
-namespace StatsdClient
+namespace SharpStatsd
 {
   /// <summary>
   /// A class that is used to measure a latency wrapped in a using block.

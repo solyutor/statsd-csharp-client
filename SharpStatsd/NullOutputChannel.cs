@@ -1,4 +1,4 @@
-﻿namespace StatsdClient
+﻿namespace SharpStatsd
 {
     public sealed class NullOutputChannel : IOutputChannel
     {

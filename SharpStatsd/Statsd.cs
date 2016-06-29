@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-namespace StatsdClient
+namespace SharpStatsd
 {
     /// <summary>
     /// The statsd client library.

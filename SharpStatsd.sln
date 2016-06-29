@@ -7,12 +7,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		CHANGELOG.md = CHANGELOG.md
 		README.md = README.md
-		nuget\StatsdClient.nuspec = nuget\StatsdClient.nuspec
+		nuget\SharpStatsd.nuspec = nuget\SharpStatsd.nuspec
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatsdClient", "StatsdClient\StatsdClient.csproj", "{D9C7B372-074B-4649-B45E-01FE10724AF9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpStatsd", "SharpStatsd\SharpStatsd.csproj", "{D9C7B372-074B-4649-B45E-01FE10724AF9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatsdClientTests", "StatsdClientTests\StatsdClientTests.csproj", "{15A2A9A7-D5A0-499D-A74B-2A06BD13B954}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpStatsd.Tests", "SharpStatsd.Tests\SharpStatsd.Tests.csproj", "{15A2A9A7-D5A0-499D-A74B-2A06BD13B954}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

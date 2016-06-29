@@ -2,7 +2,7 @@
 using System.IO;
 using System.Net.Sockets;
 
-namespace StatsdClient
+namespace SharpStatsd
 {
     internal sealed class TcpOutputChannel : IOutputChannel
     {

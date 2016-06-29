@@ -7,8 +7,8 @@
     <ProjectGuid>{D9C7B372-074B-4649-B45E-01FE10724AF9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>StatsdClient</RootNamespace>
-    <AssemblyName>StatsdClient</AssemblyName>
+    <RootNamespace>SharpStatsd</RootNamespace>
+    <AssemblyName>SharpStatsd</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -28,7 +28,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\Nuget Releases\lib\net45\StatsdClient.XML</DocumentationFile>
+    <DocumentationFile>..\Nuget Releases\lib\net45\SharpStatsd.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

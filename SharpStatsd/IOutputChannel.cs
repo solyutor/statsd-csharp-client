@@ -1,4 +1,4 @@
-﻿namespace StatsdClient
+﻿namespace SharpStatsd
 {
     /// <summary>
     /// Contract for sending raw statds lines to the server

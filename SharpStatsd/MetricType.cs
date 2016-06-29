@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace StatsdClient
+﻿namespace SharpStatsd
 {
   /// <summary>
   /// A list of metric types that statsd.net supports

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 
-namespace StatsdClient
+namespace SharpStatsd
 {
     internal sealed class UdpOutputChannel : IOutputChannel
     {

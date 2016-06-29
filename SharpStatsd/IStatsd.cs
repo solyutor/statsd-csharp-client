@@ -1,4 +1,4 @@
-﻿namespace StatsdClient
+﻿namespace SharpStatsd
 {
     /// <summary>
     /// Interface for the statsd.net client
