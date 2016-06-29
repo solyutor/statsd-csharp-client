@@ -21,7 +21,7 @@
         void LogTiming(string name, int milliseconds);
 
         /// <summary>
-        /// Log the number of unique occurrances of something
+        /// Log the number of unique occurrences of something
         /// </summary>
         /// <param name="name"></param>
         /// <param name="value"></param>

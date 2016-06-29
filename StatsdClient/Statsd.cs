@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace StatsdClient
@@ -9,8 +10,11 @@ namespace StatsdClient
     /// </summary>
     public class Statsd : IStatsd
     {
-        private readonly string _prefix;
-        private IOutputChannel _outputChannel;
+        private readonly IOutputChannel _outputChannel;
+
+        private readonly MemoryStream _stream;
+        private readonly long _initialPosition;
+        private readonly StreamWriter _writer;
 
         /// <summary>
         /// Creates a new instance of the Statsd client.
@@ -23,10 +27,23 @@ namespace StatsdClient
             {
                 throw new ArgumentNullException(nameof(outputChannel));
             }
+            _outputChannel = outputChannel;
 
-            _prefix = _prefix != null && _prefix.EndsWith(".")
-                ? _prefix.Substring(0, _prefix.Length - 1)
-                : _prefix;
+            _stream = new MemoryStream(256);
+            _writer = new StreamWriter(_stream, new UTF8Encoding(false), 128, true);
+
+            if (string.IsNullOrWhiteSpace(prefix))
+            {
+                return;
+            }
+
+            _writer.Write(prefix);
+            if (!prefix.EndsWith("."))
+            {
+                _writer.Write(".");
+            }
+            _writer.Flush();
+            _initialPosition = _stream.Position;
         }
 
         /// <summary>
@@ -36,7 +53,7 @@ namespace StatsdClient
         /// <param name="count">The counter value (defaults to 1).</param>
         public void LogCount(string name, int count = 1)
         {
-            SendMetric(MetricType.COUNT, name, _prefix, count);
+            SendMetric(MetricType.COUNT, name, count);
         }
 
         /// <summary>
@@ -46,7 +63,7 @@ namespace StatsdClient
         /// <param name="milliseconds">The duration, in milliseconds, for this metric.</param>
         public void LogTiming(string name, int milliseconds)
         {
-            SendMetric(MetricType.TIMING, name, _prefix, milliseconds);
+            SendMetric(MetricType.TIMING, name, milliseconds);
         }
 
         /// <summary>
@@ -56,7 +73,7 @@ namespace StatsdClient
         /// <param name="value">The value for this gauge</param>
         public void LogGauge(string name, int value)
         {
-            SendMetric(MetricType.GAUGE, name, _prefix, value);
+            SendMetric(MetricType.GAUGE, name, value);
         }
 
         /// <summary>
@@ -68,7 +85,7 @@ namespace StatsdClient
         /// of occurrences of each event.</remarks>
         public void LogSet(string name, int value)
         {
-            SendMetric(MetricType.SET, name, _prefix, value);
+            SendMetric(MetricType.SET, name, value);
         }
 
         /// <summary>
@@ -79,7 +96,7 @@ namespace StatsdClient
         /// <param name="period">The time period, can be one of h,d,dow,w,m</param>
         public void LogCalendargram(string name, string value, string period)
         {
-            SendMetric(MetricType.CALENDARGRAM, name, _prefix, value, period);
+            SendMetric(MetricType.CALENDARGRAM, name, value, period);
         }
 
         /// <summary>
@@ -90,7 +107,7 @@ namespace StatsdClient
         /// <param name="period">The time period, can be one of h,d,dow,w,m</param>
         public void LogCalendargram(string name, int value, string period)
         {
-            SendMetric(MetricType.CALENDARGRAM, name, _prefix, value, period);
+            SendMetric(MetricType.CALENDARGRAM, name, value, period);
         }
 
         /// <summary>
@@ -101,46 +118,35 @@ namespace StatsdClient
         /// <param name="epoch">(optional) The epoch timestamp. Leave this blank to have the server assign an epoch for you.</param>
         public void LogRaw(string name, int value, long? epoch = null)
         {
-            SendMetric(MetricType.RAW, name, String.Empty, value, epoch.HasValue ? epoch.ToString() : (string)null);
+            SendMetric(MetricType.RAW, name, value, epoch.HasValue ? epoch.ToString() : (string)null);
         }
 
-        private void SendMetric(string metricType, string name, string prefix, int value, string postFix = null)
+        private void SendMetric(string metricType, string name, int value, string postFix = null)
         {
             if (value < 0)
             {
                 Trace.TraceWarning(String.Format("Metric value for {0} was less than zero: {1}. Not sending.", name, value));
                 return;
             }
-            SendMetric(metricType, name, prefix, value.ToString(), postFix);
+            SendMetric(metricType, name, value.ToString(), postFix);
         }
 
-        private void SendMetric(string metricType, string name, string prefix, string value, string postFix = null)
+        private void SendMetric(string metricType, string name, string value, string postFix = null)
         {
             if (String.IsNullOrEmpty(name))
             {
                 throw new ArgumentNullException("name");
             }
-            string metric = PrepareMetric(metricType, name, prefix, value, postFix);
-            byte[] payload = Encoding.UTF8.GetBytes(metric);
 
-            _outputChannel.Send(payload, payload.Length);
-        }
+            _stream.SetLength(_initialPosition); // prefix is already written with dot ending
+            _writer.Write(name);
+            _writer.Write(":");
+            _writer.Write(value);
+            _writer.Write("|");
+            _writer.Write(metricType);
+            _writer.Flush();
 
-        /// <summary>
-        /// Prepare a metric prior to sending it off ot the Graphite server.
-        /// </summary>
-        /// <param name="metricType"></param>
-        /// <param name="name"></param>
-        /// <param name="prefix"></param>
-        /// <param name="value"></param>
-        /// <param name="postFix">A value to append to the end of the line.</param>
-        /// <returns>The formatted metric</returns>
-        protected virtual string PrepareMetric(string metricType, string name, string prefix, string value, string postFix = null)
-        {
-            return (String.IsNullOrEmpty(prefix) ? name : (prefix + "." + name))
-                + ":" + value
-                + "|" + metricType
-                + (postFix == null ? String.Empty : "|" + postFix);
+            _outputChannel.Send(_stream.GetBuffer(), (int)_stream.Position);
         }
     }
 }
